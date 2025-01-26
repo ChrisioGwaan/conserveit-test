@@ -45,9 +45,8 @@ jobs:
       - name: MySQL Server Stop
         run: sudo service mysql stop
 
-      - name: Navigate to the project directory
-        run: cd controlbg
       - name: Update dependency graph
         uses: advanced-security/maven-dependency-submission-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          project-path: controlbg/pom.xml
