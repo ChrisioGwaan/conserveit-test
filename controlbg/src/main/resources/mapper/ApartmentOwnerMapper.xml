@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.conserveit.controlbg.mapper.ApartmentOwnerMapper">
+
+    <resultMap id="buildingMap" type="com.conserveit.controlbg.entity.ApartmentOwner">
+        <id column="id" property="id" />
+        <result column="apartment_id" property="apartmentId" />
+        <result column="first_name" property="firstName" />
+        <result column="last_name" property="lastName" />
+        <result column="create_time" property="createTime" />
+        <result column="modified_time" property="modifiedTime" />
+        <result column="is_del" property="isDel" />
+    </resultMap>
+
+    <sql id="table_name">apartment_owner</sql>
+
+</mapper>
