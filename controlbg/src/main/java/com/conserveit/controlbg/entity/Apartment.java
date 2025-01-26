@@ -23,7 +23,7 @@ public class Apartment {
 
     private Long buildingId;
 
-    private Integer room_number;
+    private Integer roomNumber;
 
     private BigDecimal temperature;
 
