@@ -7,6 +7,8 @@ import com.conserveit.controlbg.utils.R;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/api/v1/building")
 @RequiredArgsConstructor
@@ -22,6 +24,11 @@ public class BuildingController {
         }
 
         return buildingService.createBuilding(newBuildingDTO);
+    }
+
+    @PostMapping("/tempControl")
+    public R temperatureControl(@RequestParam String buildingId, @RequestParam String newTempStr) {
+        return buildingService.temperatureControl(buildingId, newTempStr);
     }
 
 }
