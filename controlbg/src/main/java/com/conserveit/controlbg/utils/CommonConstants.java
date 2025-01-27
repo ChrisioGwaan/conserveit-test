@@ -10,4 +10,9 @@ public interface CommonConstants {
 
     Character ABNORMAL_STATE = '1';
 
+    Character ON = '1';
+
+    Character OFF = '0';
+
+
 }

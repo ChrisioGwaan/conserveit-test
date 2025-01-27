@@ -3,20 +3,20 @@ package com.conserveit.controlbg.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.conserveit.controlbg.entity.interfaces.TemperatureControl;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "common_room")
-public class CommonRoom {
+public class CommonRoom implements TemperatureControl {
 
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
