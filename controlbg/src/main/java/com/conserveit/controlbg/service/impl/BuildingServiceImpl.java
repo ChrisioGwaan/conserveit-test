@@ -11,6 +11,7 @@ import com.conserveit.controlbg.service.BuildingService;
 import com.conserveit.controlbg.utils.CommonConstants;
 import com.conserveit.controlbg.utils.R;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Random;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  implements BuildingService {
 
@@ -32,6 +34,7 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
     private final BigDecimal DEFAULT_TEMPERATURE    = new BigDecimal("20.0");
     private final BigDecimal DEFAULT_ROOM_TEMP_MIN  = new BigDecimal("10.0");
     private final BigDecimal DEFAULT_ROOM_TEMP_MAX  = new BigDecimal("40.0");
+    private final BigDecimal DEFAULT_TOLERANCE      = new BigDecimal("0.5");
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -140,8 +143,17 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
 
     // Temperature control logic
     <T extends TemperatureControl> void setTemperatureAndControl(T entity, BigDecimal buildingTemperature) {
+        BigDecimal lowerBound = buildingTemperature.subtract(DEFAULT_TOLERANCE);
+        BigDecimal upperBound = buildingTemperature.add(DEFAULT_TOLERANCE);
+
         if (ObjectUtils.isEmpty(entity.getCurrentTemperature())) {
-            entity.setCurrentTemperature(buildingTemperature);
+            entity.setIsCooling(CommonConstants.OFF);
+            entity.setIsHeating(CommonConstants.OFF);
+            log.warn("Current temperature is empty for  with id: {}", entity.getId());
+            return;
+        }
+
+        if (entity.getCurrentTemperature().compareTo(lowerBound) >= 0 && entity.getCurrentTemperature().compareTo(upperBound) <= 0) {
             entity.setIsCooling(CommonConstants.OFF);
             entity.setIsHeating(CommonConstants.OFF);
         } else if (entity.getCurrentTemperature().compareTo(buildingTemperature) > 0) {
@@ -150,9 +162,6 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
         } else if (entity.getCurrentTemperature().compareTo(buildingTemperature) < 0) {
             entity.setIsCooling(CommonConstants.OFF);
             entity.setIsHeating(CommonConstants.ON);
-        } else {
-            entity.setIsCooling(CommonConstants.OFF);
-            entity.setIsHeating(CommonConstants.OFF);
         }
     }
 
