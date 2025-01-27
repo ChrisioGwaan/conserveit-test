@@ -10,7 +10,8 @@
         <id column="id" property="id" />
         <result column="building_id" property="buildingId" />
         <result column="type" property="type" />
-        <result column="temperature" property="temperature" />
+        <result column="current_temperature" property="currentTemperature" />
+        <result column="target_temperature" property="targetTemperature" />
         <result column="is_heating" property="isHeating" />
         <result column="is_cooling" property="isCooling" />
         <result column="create_time" property="createTime" />
@@ -19,5 +20,17 @@
     </resultMap>
 
     <sql id="table_name">common_room</sql>
+
+    <select id="selectAllCommonRoomByBuildingId" resultMap="buildingMap">
+        SELECT
+            *
+        FROM
+            <include refid="table_name"/>
+        <where>
+            <if test="buildingId != null">
+                building_id = #{buildingId}
+            </if>
+        </where>
+    </select>
 
 </mapper>

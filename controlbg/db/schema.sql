@@ -75,3 +75,15 @@ CREATE TABLE `room` (
                             `is_del` CHAR(1) DEFAULT '0' COMMENT 'Deletion status',
                             PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = 'Room Table';
+
+-- Change `temperature` to current_temperature
+ALTER TABLE building CHANGE COLUMN temperature current_temperature DECIMAL(5, 2) DEFAULT NULL COMMENT 'Current temperature of the building';
+ALTER TABLE common_room CHANGE COLUMN temperature current_temperature DECIMAL(5, 2) DEFAULT NULL COMMENT 'Current temperature of the common room';
+ALTER TABLE apartment CHANGE COLUMN temperature current_temperature DECIMAL(5, 2) DEFAULT NULL COMMENT 'Current temperature of the apartment';
+ALTER TABLE room CHANGE COLUMN temperature current_temperature DECIMAL(5, 2) DEFAULT NULL COMMENT 'Current temperature of the room';
+
+-- Add `target_temperature` column
+ALTER TABLE building ADD COLUMN target_temperature DECIMAL(5, 2) DEFAULT NULL COMMENT 'Target temperature of the building' AFTER current_temperature;
+ALTER TABLE common_room ADD COLUMN target_temperature DECIMAL(5, 2) DEFAULT NULL COMMENT 'Target temperature of the common room' AFTER current_temperature;
+ALTER TABLE apartment ADD COLUMN target_temperature DECIMAL(5, 2) DEFAULT NULL COMMENT 'Target temperature of the apartment' AFTER current_temperature;
+ALTER TABLE room ADD COLUMN target_temperature DECIMAL(5, 2) DEFAULT NULL COMMENT 'Target temperature of the room' AFTER current_temperature;

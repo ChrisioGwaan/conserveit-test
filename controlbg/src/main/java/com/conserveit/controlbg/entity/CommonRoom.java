@@ -25,7 +25,9 @@ public class CommonRoom implements TemperatureControl {
 
     private Integer type;
 
-    private BigDecimal temperature;
+    private BigDecimal currentTemperature;
+
+    private BigDecimal targetTemperature;
 
     private Character isHeating;
 

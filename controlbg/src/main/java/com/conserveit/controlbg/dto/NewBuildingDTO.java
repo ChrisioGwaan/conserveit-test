@@ -14,7 +14,7 @@ public class NewBuildingDTO {
         commonRooms = new ArrayList<>();
     }
 
-    private BigDecimal temperature;
+    private BigDecimal targetTemperature;
 
     private Integer numberOfApartment;
 

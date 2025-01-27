@@ -23,7 +23,9 @@ public class Room implements TemperatureControl {
 
     private Long apartmentId;
 
-    private BigDecimal temperature;
+    private BigDecimal currentTemperature;
+
+    private BigDecimal targetTemperature;
 
     private Character isHeating;
 

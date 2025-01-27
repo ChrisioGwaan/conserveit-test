@@ -25,7 +25,9 @@ public class Apartment implements TemperatureControl {
 
     private Integer roomNumber;
 
-    private BigDecimal temperature;
+    private BigDecimal currentTemperature;
+
+    private BigDecimal targetTemperature;
 
     private Character isHeating;
 

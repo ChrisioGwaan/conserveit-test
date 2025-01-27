@@ -17,7 +17,7 @@ public class NewApartmentDTO {
 
     private Integer roomNumber;
 
-    private BigDecimal temperature;
+    private BigDecimal targetTemperature;
 
     private Character isHeating;
 
