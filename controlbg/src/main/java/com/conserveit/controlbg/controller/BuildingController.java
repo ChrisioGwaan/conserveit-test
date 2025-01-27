@@ -27,8 +27,15 @@ public class BuildingController {
     }
 
     @PostMapping("/tempControl")
-    public R temperatureControl(@RequestParam String buildingId, @RequestParam String newTempStr) {
+    public R temperatureControl(@RequestParam("buildingId") String buildingId,
+                                @RequestParam("newTempStr") String newTempStr) {
         return buildingService.temperatureControl(buildingId, newTempStr);
+    }
+
+    @PutMapping("/updateCurTemp")
+    public R updateBuildingCurrentTemp(@RequestParam("buildingId") String buildingId,
+                                       @RequestParam("newTempStr") String newTempStr) {
+        return buildingService.updateBuildingCurrentTemp(buildingId, newTempStr);
     }
 
 }

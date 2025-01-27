@@ -20,4 +20,6 @@ public interface BuildingService extends IService<Building> {
     // Can set schedule for temperature control
     R temperatureControl(String buildingId, String newTempStr);
 
+    R updateBuildingCurrentTemp(String buildingId, String newTempStr);
+
 }

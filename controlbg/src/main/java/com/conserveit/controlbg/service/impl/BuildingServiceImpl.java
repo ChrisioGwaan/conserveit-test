@@ -74,8 +74,8 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
 
                 setTemperatureAndControl(apartment, building.getTargetTemperature());
 
-                if (apartmentDTO.getRoomNumber() != apartmentDTO.getRooms().size()) {
-                    apartment.setRoomNumber(apartmentDTO.getRooms().size());
+                if (ObjectUtils.isEmpty(apartment.getNumberOfRoom())) {
+                    apartment.setNumberOfRoom(apartmentDTO.getRooms().size());
                 }
 
                 apartmentMapper.insert(apartment);
@@ -208,6 +208,25 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
         });
 
         return R.ok("Temperature control successful");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R updateBuildingCurrentTemp(String buildingId, String newTempStr) {
+        // Assume that the current temperature as manually input
+        // Real implementation should be done by reading the temperature from the sensor
+
+        Building building = this.getById(buildingId);
+
+        if (ObjectUtils.isEmpty(building)) {
+            return R.failed("Building not found");
+        }
+
+        building.setCurrentTemperature(new BigDecimal(newTempStr));
+        building.setModifiedTime(LocalDateTime.now());
+        this.updateById(building);
+
+        return R.ok("Update building temperature successfully");
     }
 
 }
