@@ -7,13 +7,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum CommonRoomEnum {
 
-    GYM("0", "Gym"),
+    UNKNOWN(0, "Unknown"),
 
-    LIBRARY("1", "Library"),
+    GYM(1, "Gym"),
 
-    LAUNDRY("2", "Laundry");
+    LIBRARY(2, "Library"),
 
-    private final String type;
+    LAUNDRY(3, "Laundry");
+
+    private final Integer type;
 
     private final String name;
 

@@ -15,9 +15,11 @@ public class NewApartmentDTO {
 
     private String buildingId;
 
-    private Integer roomNumber;
+    private String roomNumber;
 
-    private BigDecimal temperature;
+    private Integer numberOfRoom;
+
+    private BigDecimal targetTemperature;
 
     private Character isHeating;
 

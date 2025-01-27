@@ -8,7 +8,8 @@
 
     <resultMap id="buildingMap" type="com.conserveit.controlbg.entity.Building">
         <id column="id" property="id" />
-        <result column="temperature" property="temperature" />
+        <result column="current_temperature" property="currentTemperature" />
+        <result column="target_temperature" property="targetTemperature" />
         <result column="number_of_apartment" property="numberOfApartment" />
         <result column="number_of_common_room" property="numberOfCommonRoom" />
         <result column="create_time" property="createTime" />

@@ -5,20 +5,24 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.conserveit.controlbg.dto.NewBuildingDTO;
 import com.conserveit.controlbg.entity.*;
 import com.conserveit.controlbg.entity.interfaces.TemperatureControl;
+import com.conserveit.controlbg.enums.CommonRoomEnum;
 import com.conserveit.controlbg.mapper.*;
 import com.conserveit.controlbg.service.BuildingService;
 import com.conserveit.controlbg.utils.CommonConstants;
 import com.conserveit.controlbg.utils.R;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  implements BuildingService {
 
@@ -30,6 +34,7 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
     private final BigDecimal DEFAULT_TEMPERATURE    = new BigDecimal("20.0");
     private final BigDecimal DEFAULT_ROOM_TEMP_MIN  = new BigDecimal("10.0");
     private final BigDecimal DEFAULT_ROOM_TEMP_MAX  = new BigDecimal("40.0");
+    private final BigDecimal DEFAULT_TOLERANCE      = new BigDecimal("0.5");
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -41,8 +46,8 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
         }
 
         // Set default temperature if temperature is empty
-        if (ObjectUtils.isEmpty(newBuildingDTO.getTemperature())) {
-            newBuildingDTO.setTemperature(DEFAULT_TEMPERATURE);
+        if (ObjectUtils.isEmpty(newBuildingDTO.getTargetTemperature())) {
+            newBuildingDTO.setTargetTemperature(DEFAULT_TEMPERATURE);
         }
 
         Building building = new Building();
@@ -60,17 +65,17 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
                 apartment.setCreateTime(LocalDateTime.now());
 
                 // Set a random temperature between 10.0 and 40.0 if temperature is empty
-                if (ObjectUtils.isEmpty(apartment.getTemperature())) {
-                    apartment.setTemperature(BigDecimal.valueOf(
+                if (ObjectUtils.isEmpty(apartment.getTargetTemperature())) {
+                    apartment.setTargetTemperature(BigDecimal.valueOf(
                             new Random().nextDouble()
                                     * (DEFAULT_ROOM_TEMP_MAX.doubleValue() - DEFAULT_ROOM_TEMP_MIN.doubleValue())
                                     + DEFAULT_ROOM_TEMP_MIN.doubleValue()));
                 }
 
-                setTemperatureAndControl(apartment, building.getTemperature());
+                setTemperatureAndControl(apartment, building.getTargetTemperature());
 
-                if (apartmentDTO.getRoomNumber() != apartmentDTO.getRooms().size()) {
-                    apartment.setRoomNumber(apartmentDTO.getRooms().size());
+                if (ObjectUtils.isEmpty(apartment.getNumberOfRoom())) {
+                    apartment.setNumberOfRoom(apartmentDTO.getRooms().size());
                 }
 
                 apartmentMapper.insert(apartment);
@@ -95,14 +100,14 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
                         room.setCreateTime(LocalDateTime.now());
 
                         // Set a random temperature between 10.0 and 40.0 if temperature is empty
-                        if (ObjectUtils.isEmpty(room.getTemperature())) {
-                            room.setTemperature(BigDecimal.valueOf(
+                        if (ObjectUtils.isEmpty(room.getTargetTemperature())) {
+                            room.setTargetTemperature(BigDecimal.valueOf(
                                     new Random().nextDouble()
                                             * (DEFAULT_ROOM_TEMP_MAX.doubleValue() - DEFAULT_ROOM_TEMP_MIN.doubleValue())
                                             + DEFAULT_ROOM_TEMP_MIN.doubleValue()));
                         }
 
-                        setTemperatureAndControl(room, building.getTemperature());
+                        setTemperatureAndControl(room, building.getTargetTemperature());
                         roomMapper.insert(room);
                     });
                 }
@@ -116,15 +121,19 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
                 commonRoom.setBuildingId(building.getId());
                 commonRoom.setCreateTime(LocalDateTime.now());
 
+                if (ObjectUtils.isEmpty(commonRoom.getType())) {
+                    commonRoom.setType(CommonRoomEnum.UNKNOWN.getType());
+                }
+
                 // Set a random temperature between 10.0 and 40.0 if temperature is empty
-                if (ObjectUtils.isEmpty(commonRoom.getTemperature())) {
-                    commonRoom.setTemperature(BigDecimal.valueOf(
+                if (ObjectUtils.isEmpty(commonRoom.getTargetTemperature())) {
+                    commonRoom.setTargetTemperature(BigDecimal.valueOf(
                             new Random().nextDouble()
                                     * (DEFAULT_ROOM_TEMP_MAX.doubleValue() - DEFAULT_ROOM_TEMP_MIN.doubleValue())
                                     + DEFAULT_ROOM_TEMP_MIN.doubleValue()));
                 }
 
-                setTemperatureAndControl(commonRoom, building.getTemperature());
+                setTemperatureAndControl(commonRoom, building.getTargetTemperature());
                 commonRoomMapper.insert(commonRoom);
             });
         }
@@ -134,19 +143,25 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
 
     // Temperature control logic
     <T extends TemperatureControl> void setTemperatureAndControl(T entity, BigDecimal buildingTemperature) {
-        if (ObjectUtils.isEmpty(entity.getTemperature())) {
-            entity.setTemperature(buildingTemperature);
+        BigDecimal lowerBound = buildingTemperature.subtract(DEFAULT_TOLERANCE);
+        BigDecimal upperBound = buildingTemperature.add(DEFAULT_TOLERANCE);
+
+        if (ObjectUtils.isEmpty(entity.getCurrentTemperature())) {
             entity.setIsCooling(CommonConstants.OFF);
             entity.setIsHeating(CommonConstants.OFF);
-        } else if (entity.getTemperature().compareTo(buildingTemperature) > 0) {
+            log.warn("Current temperature is empty for  with id: {}", entity.getId());
+            return;
+        }
+
+        if (entity.getCurrentTemperature().compareTo(lowerBound) >= 0 && entity.getCurrentTemperature().compareTo(upperBound) <= 0) {
+            entity.setIsCooling(CommonConstants.OFF);
+            entity.setIsHeating(CommonConstants.OFF);
+        } else if (entity.getCurrentTemperature().compareTo(buildingTemperature) > 0) {
             entity.setIsHeating(CommonConstants.OFF);
             entity.setIsCooling(CommonConstants.ON);
-        } else if (entity.getTemperature().compareTo(buildingTemperature) < 0) {
+        } else if (entity.getCurrentTemperature().compareTo(buildingTemperature) < 0) {
             entity.setIsCooling(CommonConstants.OFF);
             entity.setIsHeating(CommonConstants.ON);
-        } else {
-            entity.setIsCooling(CommonConstants.OFF);
-            entity.setIsHeating(CommonConstants.OFF);
         }
     }
 
@@ -165,6 +180,53 @@ public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building>  
     @Transactional(rollbackFor = Exception.class)
     public R deleteBuilding() {
         return null;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R temperatureControl(String buildingId, String newTempStr) {
+        BigDecimal newTemp = new BigDecimal(newTempStr);
+        Building building = this.getById(buildingId);
+
+        if (ObjectUtils.isEmpty(building)) {
+            return R.failed("Building not found in database");
+        }
+
+        building.setModifiedTime(LocalDateTime.now());
+        building.setTargetTemperature(newTemp);
+        this.updateById(building);
+
+        List<CommonRoom> commonRoomList = commonRoomMapper.selectAllCommonRoomByBuildingId(buildingId);
+
+        commonRoomList.forEach(commonRoom -> {
+            if (ObjectUtils.isNotEmpty(commonRoom)) {
+                commonRoom.setTargetTemperature(newTemp);
+                commonRoom.setModifiedTime(LocalDateTime.now());
+                setTemperatureAndControl(commonRoom, commonRoom.getTargetTemperature());
+                commonRoomMapper.updateById(commonRoom);
+            }
+        });
+
+        return R.ok("Temperature control successful");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R updateBuildingCurrentTemp(String buildingId, String newTempStr) {
+        // Assume that the current temperature as manually input
+        // Real implementation should be done by reading the temperature from the sensor
+
+        Building building = this.getById(buildingId);
+
+        if (ObjectUtils.isEmpty(building)) {
+            return R.failed("Building not found");
+        }
+
+        building.setCurrentTemperature(new BigDecimal(newTempStr));
+        building.setModifiedTime(LocalDateTime.now());
+        this.updateById(building);
+
+        return R.ok("Update building temperature successfully");
     }
 
 }

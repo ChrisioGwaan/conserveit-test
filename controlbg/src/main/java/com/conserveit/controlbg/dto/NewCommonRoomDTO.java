@@ -11,7 +11,7 @@ public class NewCommonRoomDTO {
 
     private Integer type;
 
-    private BigDecimal temperature;
+    private BigDecimal targetTemperature;
 
     private Character isHeating;
 

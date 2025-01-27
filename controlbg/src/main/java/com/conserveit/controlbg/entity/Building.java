@@ -21,7 +21,9 @@ public class Building {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
-    private BigDecimal temperature;
+    private BigDecimal currentTemperature;
+
+    private BigDecimal targetTemperature;
 
     private Integer numberOfApartment;
 
