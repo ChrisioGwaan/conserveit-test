@@ -10,6 +10,7 @@
         <id column="id" property="id" />
         <result column="building_id" property="buildingId" />
         <result column="room_number" property="roomNumber" />
+        <result column="number_of_room" property="numberOfRoom" />
         <result column="current_temperature" property="currentTemperature" />
         <result column="target_temperature" property="targetTemperature" />
         <result column="is_heating" property="isHeating" />
